@@ -1,60 +1,49 @@
 package com.example.taskmanager.service;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import com.example.taskmanager.model.Task;
+import com.example.taskmanager.repository.TaskRepository;
 import org.springframework.stereotype.Service;
 
-import com.example.taskmanager.model.Task;
+import java.util.List;
 
 @Service
 public class TaskService {
 
-    private final List<Task> tasks = new ArrayList<>();
+    private final TaskRepository taskRepository;
 
-    public List<Task> getAllTask() {
-        return tasks;
+    public TaskService(TaskRepository taskRepository) {
+        this.taskRepository = taskRepository;
     }
 
-    public Task addTask(Task task) {
-        tasks.add(task);
-        return task;
+    public List<Task> getAllTask() {
+        return taskRepository.findAll();
     }
 
     public Task getTaskById(Long id) {
-        for (Task task : tasks) {
-            if (task.id().equals(id)) {
-                return task;
-            }
-        }
+        return taskRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Task not found"));
+    }
 
-        return null;
+    public Task addTask(Task task) {
+        return taskRepository.save(task);
     }
 
     public boolean deleteById(Long id) {
-        return tasks.removeIf(task -> task.id().equals(id));
-    }
-
-    public Task updateTask(Long id, Task updatedTask) {
-
-        for (int i = 0; i < tasks.size(); i++) {
-
-            Task task = tasks.get(i);
-
-            if (task.id().equals(id)) {
-
-                Task newTask = new Task(
-                        id,
-                        updatedTask.title(),
-                        updatedTask.description(),
-                        updatedTask.status());
-
-                tasks.set(i, newTask);
-
-                return newTask;
-            }
+        if (!taskRepository.existsById(id)) {
+            return false;
         }
 
-        return null;
+        taskRepository.deleteById(id);
+        return true;
+    }
+
+    public Task updateTask(Long id, Task newTask) {
+        Task existingTask = getTaskById(id);
+
+        existingTask.setTitle(newTask.getTitle());
+        existingTask.setDescription(newTask.getDescription());
+        existingTask.setStatus(newTask.getStatus());
+
+        return taskRepository.save(existingTask);
     }
 }

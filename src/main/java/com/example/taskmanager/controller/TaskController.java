@@ -2,6 +2,8 @@ package com.example.taskmanager.controller;
 
 import com.example.taskmanager.service.TaskService;
 
+import jakarta.validation.Valid;
+
 import java.util.List;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -36,8 +38,8 @@ public class TaskController {
         return taskService.getTaskById(id);
     }
 
-    @PostMapping()
-    public Task postMethodName(@RequestBody Task task) {
+    @PostMapping
+    public Task createTask(@Valid @RequestBody Task task) {
         return taskService.addTask(task);
     }
 
@@ -49,7 +51,7 @@ public class TaskController {
     @PutMapping("/{id}")
     public Task updateTask(
             @PathVariable Long id,
-            @RequestBody Task task) {
+            @Valid @RequestBody Task task) {
 
         return taskService.updateTask(id, task);
     }
